@@ -1,0 +1,210 @@
+﻿@page "/"
+
+@rendermode InteractiveServer
+@using System.ComponentModel;
+@using System.ComponentModel.DataAnnotations
+@using Syncfusion.Blazor.DataForm
+@using Syncfusion.Blazor.Buttons
+@using Syncfusion.Blazor.Inputs
+@using Syncfusion.Blazor.Calendars
+@using Syncfusion.Blazor.DropDowns
+
+
+<style>
+    .form-container {
+        background: linear-gradient(135deg, #f0f4f8, #d9e2ec);
+        border-radius: 10px;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        padding: 20px;
+        margin: 20px auto;
+        max-width: 800px;
+    }
+
+    .section-header {
+        font-size: 1.5rem;
+        font-weight: bold;
+        color: #333;
+        margin-top: 15px;
+        margin-bottom: 15px;
+        padding-bottom: 5px;
+        border-bottom: 2px solid #007bff;
+    }
+
+    .form-label {
+        font-size: 1.1rem;
+        color: #555;
+        margin-bottom: 5px;
+    }
+
+    .form-input {
+        border: 1px solid #ccc;
+        border-radius: 5px;
+        padding: 10px;
+        width: 100%;
+        box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.1);
+        transition: border-color 0.3s, box-shadow 0.3s;
+    }
+
+    .form-input:focus {
+        border-color: #007bff;
+        box-shadow: 0 0 5px rgba(0, 123, 255, 0.5);
+        outline: none;
+    }
+
+    .checkbox-label {
+        display: flex;
+        align-items: center;
+        margin-top: 10px;
+    }
+
+    .checkbox-input {
+        margin-right: 10px;
+    }
+
+    .submit-button {
+        background: linear-gradient(135deg, #007bff, #0056b3);
+        color: white;
+        border: none;
+        border-radius: 5px;
+        padding: 10px 20px;
+        font-size: 1.1rem;
+        cursor: pointer;
+        transition: transform 0.2s, background 0.3s;
+    }
+
+    .submit-button:hover {
+        transform: scale(1.05);
+        background: linear-gradient(135deg, #0056b3, #007bff);
+    }
+
+    .validation-message {
+        color: red;
+        font-size: 0.9rem;
+        margin-top: 5px;
+    }
+</style>
+
+<div class="form-container">
+    <SfDataForm @ref="dataForm" ID="UserProfileForm" Model="@userProfile" ValidationDisplayMode="FormValidationDisplay.Tooltip">
+        <FormValidator>
+            <DataAnnotationsValidator></DataAnnotationsValidator>
+            <ValidationSummary />
+        </FormValidator>
+        <FormItems>
+            <FormGroup LabelText="Personal Information" CssClass="section-header">
+                <FormItem Field="@nameof(UserProfile.FirstName)" LabelText="First Name" CssClass="form-label" />
+                <FormItem Field="@nameof(UserProfile.LastName)" LabelText="Last Name" CssClass="form-label" />
+                <FormItem Field="@nameof(UserProfile.Email)" LabelText="Email" CssClass="form-label" />
+                <FormItem Field="@nameof(UserProfile.DateOfBirth)" LabelText="Date of Birth" CssClass="form-label">
+                    <Template>
+                        <label class="e-form-label">Date of Birth</label>
+                        <SfDatePicker ID="@nameof(UserProfile.DateOfBirth)" TValue="DateTime?" @bind-Value="@userProfile.DateOfBirth" />
+                    </Template>
+                </FormItem>
+            </FormGroup>
+            <FormGroup LabelText="Address Details" CssClass="section-header">
+                <FormItem Field="@nameof(UserProfile.AddressLine1)" LabelText="Address Line 1" CssClass="form-label" />
+                <FormItem Field="@nameof(UserProfile.AddressLine2)" LabelText="Address Line 2" CssClass="form-label" />
+                <FormItem Field="@nameof(UserProfile.City)" LabelText="City" CssClass="form-label" />
+                <FormItem Field="@nameof(UserProfile.State)" LabelText="State" CssClass="form-label" />
+                <FormItem Field="@nameof(UserProfile.ZipCode)" LabelText="Zip Code" CssClass="form-label" />
+            </FormGroup>
+            <FormGroup LabelText="Preferences" CssClass="section-header">
+                <FormItem Field="@nameof(UserProfile.ReceiveNewsletter)" CssClass="checkbox-label">
+                    <Template>
+                        <SfCheckBox @bind-Checked="@userProfile.ReceiveNewsletter" Label="Receive Newsletter" LabelPosition="Syncfusion.Blazor.Buttons.LabelPosition.After" CssClass="checkbox-input" />
+                    </Template>
+                </FormItem>
+                <FormItem  Field="@nameof(UserProfile.PreferredLanguage)" CssClass="form-label">
+                    <Template>
+                        <label class="e-form-label">Preferred Language</label>
+                        <SfDropDownList Enabled="@userProfile.ReceiveNewsletter" ID="@nameof(UserProfile.PreferredLanguage)" TItem="string" TValue="string" DataSource="@languages" @bind-Value="@userProfile.PreferredLanguage">
+                            <DropDownListFieldSettings Text="Text" Value="Value" />
+                        </SfDropDownList>
+                    </Template>
+                </FormItem>
+                <FormItem IsEnabled="@userProfile.ReceiveNewsletter" Field="@nameof(UserProfile.NewsletterFrequency)" LabelText="Newsletter Frequency" CssClass="form-label" />
+            </FormGroup>
+        </FormItems>
+        <FormButtons>
+            <SfButton IsPrimary="true" OnClick="@SubmitForm" CssClass="submit-button">Submit</SfButton>
+        </FormButtons>
+    </SfDataForm>
+</div>
+
+
+
+@code {
+    private SfDataForm dataForm;
+    private UserProfile userProfile = new UserProfile();
+    private List<string> languages = new List<string> { "English", "Spanish", "French" };
+    private void SubmitForm()
+    {
+        var isValid = dataForm.IsValid();
+        if (isValid)
+        {
+            // Process form data (e.g., save to API)
+            Console.WriteLine("Form submitted successfully!");
+        }
+    }
+    public class UserProfile
+    {
+        [Required(ErrorMessage = "First name is required.")]
+        [StringLength(50, ErrorMessage = "First name cannot exceed 50 characters.")]
+        public string FirstName { get; set; }
+
+        [StringLength(50, ErrorMessage = "Last name cannot exceed 50 characters.")]
+        public string LastName { get; set; }
+
+        [Required(ErrorMessage = "Email is required.")]
+        [EmailAddress(ErrorMessage = "Invalid email address.")]
+        [UniqueEmail]
+        public string Email { get; set; }
+
+        [Required(ErrorMessage = "Date of birth is required.")]
+        [DataType(DataType.Date)]
+        public DateTime? DateOfBirth { get; set; }
+
+        [Required(ErrorMessage = "Address Line 1 is required.")]
+        [StringLength(100, ErrorMessage = "Address Line 1 cannot exceed 100 characters.")]
+        public string AddressLine1 { get; set; }
+
+        [StringLength(100, ErrorMessage = "Address Line 2 cannot exceed 100 characters.")]
+        public string AddressLine2 { get; set; } // Optional field
+
+        [Required(ErrorMessage = "City is required.")]
+        [StringLength(50, ErrorMessage = "City cannot exceed 50 characters.")]
+        public string City { get; set; }
+
+        [Required(ErrorMessage = "State is required.")]
+        [StringLength(50, ErrorMessage = "State cannot exceed 50 characters.")]
+        public string State { get; set; }
+
+        [Required(ErrorMessage = "Zip code is required.")]
+        [RegularExpression(@"^\d{5}(-\d{4})?$", ErrorMessage = "Invalid zip code format.")]
+        public string ZipCode { get; set; }
+
+        public bool ReceiveNewsletter { get; set; }
+
+        [Required(ErrorMessage = "Preferred language is required.")]
+        public string PreferredLanguage { get; set; }
+
+        [StringLength(20, ErrorMessage = "Newsletter frequency cannot exceed 20 characters.")]
+        public string NewsletterFrequency { get; set; } // Optional, shown conditionally
+    }
+
+
+    public class UniqueEmailAttribute : ValidationAttribute
+    {
+        protected override ValidationResult IsValid(object value, ValidationContext validationContext)
+        {
+            var email = value as string;
+            // Placeholder logic: assume "taken@example.com" is already used
+            if (email == "taken@example.com")
+            {
+                return new ValidationResult("Email already exists.");
+            }
+            return ValidationResult.Success;
+        }
+    }
+}
